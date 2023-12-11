@@ -10,21 +10,26 @@ pub fn new_table(height: &str, width: &str) -> String {
 }
 
 fn generate_html_table(height: u32, width: u32) -> String {
-    let mut table = String::from("<meta charset=\"utf-8\"><b style=\"font-weight:normal;\"> 
-    <div dir=\"ltr\" style=\"margin-left:0pt;\" align=\"left\">
-    <table style=\"border:none;border-collapse:collapse;table-layout:fixed;width:451.27559055118115pt;font-size:11px\">
+    let mut table = String::from(
+        "<meta charset=\"utf-8\"><b style=\"font-weight:normal;\"> 
+    <div dir=\"ltr\">
+    <table>
     <colgroup>
-    <col /><col /><col /><col /></colgroup>
+    <col/><col/><col/><col/></colgroup>
     <tbody>
-    ");
+    ",
+    );
 
     for _ in 0..height {
         table.push_str("<tr style=\"height:0pt\">");
         for _ in 0..width {
-            table.push_str("
-            <td style=\"border-left:solid #000000 1pt;border-right:solid #000000 1pt;border-bottom:solid #000000 1pt;border-top:solid #000000 1pt;vertical-align:top;padding:5pt 5pt 5pt 5pt;overflow:hidden;overflow-wrap:break-word;\">
-            <input></input>
-            </td>");
+            table.push_str(
+                "
+                <td>
+                <input/>
+                </td>
+                ",
+            );
         }
         table.push_str("</tr>");
     }
