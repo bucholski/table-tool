@@ -21,9 +21,51 @@ pub struct Table {
     pub rows: Vec<Row>,
 }
 
-// pub struct HTLM {
-//     pub data: String,
-// }
+pub fn add_row(table: Table, y: u32) -> Table {
+    todo!()
+}
+
+pub fn remove_row(table: Table, y: u32) -> Table {
+    todo!()
+}
+
+pub fn add_column(table: Table, x: u32) -> Table {
+    todo!()
+}
+
+pub fn remove_column(table: Table, x: u32) -> Table {
+    todo!()
+}
+
+pub fn new_cell(x: u32, y: u32, rowspan: u32, colspan: u32, data: String) -> Cell {
+    Cell {
+        x,
+        y,
+        rowspan,
+        colspan,
+
+        data: data,
+    }
+}
+
+pub fn new_row(width: u32, order: u32) -> Row {
+    let mut vec_of_cells: Vec<Cell> = Vec::new();
+    for x in 0..width {
+        vec_of_cells.push(new_cell(x, order, 1, 1, "".to_string()))
+    }
+    Row {
+        order,
+        cells: vec_of_cells,
+    }
+}
+
+pub fn new_table(height: u32, width: u32) -> Table {
+    let mut vec_of_rows: Vec<Row> = Vec::new();
+    for y in 0..height {
+        vec_of_rows.push((new_row(width, y)))
+    }
+    Table { rows: vec_of_rows }
+}
 
 pub trait ToHtml {
     fn to_html(&self) -> String;
@@ -33,12 +75,12 @@ impl From<&String> for Cell {
     fn from(html_cell: &String) -> Cell {
         let values: Vec<String> = html_cell
             .trim_start_matches("<td x=")
-            .replace(" y=", "__d3l1m1t3r__")
-            .replace(" rowspan=", "__d3l1m1t3r__")
-            .replace(" colspan=", "__d3l1m1t3r__")
-            .replace(" ><input>", "__d3l1m1t3r__")
+            .replace(" y=", "→→!!delimiter!!←←")
+            .replace(" rowspan=", "→→!!delimiter!!←←")
+            .replace(" colspan=", "→→!!delimiter!!←←")
+            .replace(" ><input>", "→→!!delimiter!!←←")
             .trim_end_matches("</input></td>")
-            .split("__d3l1m1t3r__")
+            .split("→→!!delimiter!!←←")
             .map(|x| x.to_string())
             .collect();
 
@@ -127,36 +169,6 @@ impl ToHtml for Table {
             .collect();
         format!("<table>{}</table>", html_rows)
     }
-}
-
-pub fn new_cell(x: u32, y: u32, rowspan: u32, colspan: u32, data: String) -> Cell {
-    Cell {
-        x,
-        y,
-        rowspan,
-        colspan,
-
-        data: data,
-    }
-}
-
-pub fn new_row(width: u32, order: u32) -> Row {
-    let mut vec_of_cells: Vec<Cell> = Vec::new();
-    for x in 0..width {
-        vec_of_cells.push(new_cell(x, order, 1, 1, "".to_string()))
-    }
-    Row {
-        order,
-        cells: vec_of_cells,
-    }
-}
-
-pub fn new_table(height: u32, width: u32) -> Table {
-    let mut vec_of_rows: Vec<Row> = Vec::new();
-    for y in 0..height {
-        vec_of_rows.push(new_row(width, y))
-    }
-    Table { rows: vec_of_rows }
 }
 
 #[cfg(test)]
