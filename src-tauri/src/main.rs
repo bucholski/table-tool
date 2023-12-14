@@ -3,12 +3,22 @@
 
 // Learn more about Tauri commands at https://tauri.app/v1/guides/features/command
 pub mod structure;
-pub mod table_creation;
+use structure::ToHtml;
+// use structure;
 
 #[tauri::command]
 fn generate_new_table(height: &str, width: &str) -> String {
     println!("width: {} height: {}", width, height);
-    table_creation::new_table(height, width)
+    let height: u32 = match height.parse() {
+        Ok(number) => number,
+        Err(_) => todo!("only numbers plz"),
+    };
+    let width: u32 = match width.parse() {
+        Ok(number) => number,
+        Err(_) => todo!("only numbers plz"),
+    };
+    let table = structure::new_table(height, width);
+    table.to_html()
 }
 
 fn main() {

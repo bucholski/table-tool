@@ -33,26 +33,31 @@ impl From<&String> for Cell {
     fn from(html_cell: &String) -> Cell {
         let values: Vec<String> = html_cell
             .trim_start_matches("<td x=")
-            .replace(" y=", ",")
-            .replace(" rowspan=", ",")
-            .replace(" colspan=", ",")
-            .replace(" ><input>", ",")
+            .replace(" y=", "__d3l1m1t3r__")
+            .replace(" rowspan=", "__d3l1m1t3r__")
+            .replace(" colspan=", "__d3l1m1t3r__")
+            .replace(" ><input>", "__d3l1m1t3r__")
             .trim_end_matches("</input></td>")
-            .split(',')
+            .split("__d3l1m1t3r__")
             .map(|x| x.to_string())
             .collect();
+
         new_cell(
-            values[0]
-                .parse()
-                .unwrap_or(panic!("Value of x failed when paring html cell to struct")),
-            values[1]
-                .parse()
-                .unwrap_or(panic!("Value of y failed when paring html cell to struct")),
-            values[2].parse().unwrap_or(panic!(
-                "Value of colspan failed when paring html cell to struct"
+            values[0].parse().expect(&format!(
+                "Parsing of 'x' value resulted in an error. The value was {}",
+                values[0]
             )),
-            values[3].parse().unwrap_or(panic!(
-                "Value of rowspan failed when paring html cell to struct"
+            values[1].parse().expect(&format!(
+                "Parsing of 'y' value resulted in an error. The value was {}",
+                values[0]
+            )),
+            values[2].parse().expect(&format!(
+                "Parsing of 'rowspan' value resulted in an error. The value was {}",
+                values[0]
+            )),
+            values[3].parse().expect(&format!(
+                "Parsing of 'colspan' value resulted in an error. The value was {}",
+                values[0]
             )),
             values[4].to_string(),
         )
@@ -149,7 +154,7 @@ pub fn new_row(width: u32, order: u32) -> Row {
 pub fn new_table(height: u32, width: u32) -> Table {
     let mut vec_of_rows: Vec<Row> = Vec::new();
     for y in 0..height {
-        vec_of_rows.push((new_row(width, y)))
+        vec_of_rows.push(new_row(width, y))
     }
     Table { rows: vec_of_rows }
 }
