@@ -3,7 +3,6 @@
 
 // Learn more about Tauri commands at https://tauri.app/v1/guides/features/command
 pub mod structure;
-use structure::ToHtml;
 // use structure;
 
 #[tauri::command]
@@ -17,7 +16,7 @@ fn generate_new_table(height: &str, width: &str) -> String {
         Ok(number) => number,
         Err(_) => todo!("only numbers plz"),
     };
-    let table = structure::new_table(height, width);
+    let table = structure::Table::new(height, width);
     table.to_html()
 }
 
