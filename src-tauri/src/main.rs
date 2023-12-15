@@ -8,11 +8,11 @@ pub mod structure;
 #[tauri::command]
 fn generate_new_table(height: &str, width: &str) -> String {
     println!("width: {} height: {}", width, height);
-    let height: u32 = match height.parse() {
+    let height: usize = match height.parse() {
         Ok(number) => number,
         Err(_) => todo!("only numbers plz"),
     };
-    let width: u32 = match width.parse() {
+    let width: usize = match width.parse() {
         Ok(number) => number,
         Err(_) => todo!("only numbers plz"),
     };
