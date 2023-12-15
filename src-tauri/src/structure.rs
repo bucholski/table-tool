@@ -67,7 +67,7 @@ impl Table {
     pub fn new(height: u32, width: u32) -> Table {
         let mut vec_of_rows: Vec<Row> = Vec::new();
         for y in 0..height {
-            vec_of_rows.push((Row::new(width, y)))
+            vec_of_rows.push(Row::new(width, y))
         }
         Table {
             rows: vec_of_rows,
