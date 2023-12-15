@@ -1,30 +1,30 @@
 //TODO
-//every From method should return a Result e.g. Result<Ok(Cell), Err(e)>
+//every From -> TryFrom should return a Result e.g. Result<Ok(Cell), Err(e)>? ?????
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Clone)]
 pub struct Cell {
-    pub x: u32,
-    pub y: u32,
-    pub rowspan: u32,
-    pub colspan: u32,
+    pub x: usize,
+    pub y: usize,
+    pub rowspan: usize,
+    pub colspan: usize,
     pub data: String,
 }
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Clone)]
 pub struct Row {
-    pub order: u32,
+    pub order: usize,
     pub cells: Vec<Cell>,
 }
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Clone)]
 pub struct Table {
     pub rows: Vec<Row>,
-    pub height: u32,
-    pub width: u32,
+    pub height: usize,
+    pub width: usize,
 }
 
 impl Cell {
-    pub fn new(x: u32, y: u32, rowspan: u32, colspan: u32, data: String) -> Cell {
+    pub fn new(x: usize, y: usize, rowspan: usize, colspan: usize, data: String) -> Cell {
         Cell {
             x,
             y,
@@ -40,9 +40,8 @@ impl Cell {
         )
     }
 }
-
 impl Row {
-    pub fn new(width: u32, order: u32) -> Row {
+    pub fn new(width: usize, order: usize) -> Row {
         let mut vec_of_cells: Vec<Cell> = Vec::new();
         for x in 0..width {
             vec_of_cells.push(Cell::new(x, order, 1, 1, "".to_string()))
@@ -64,7 +63,7 @@ impl Row {
 }
 
 impl Table {
-    pub fn new(height: u32, width: u32) -> Table {
+    pub fn new(height: usize, width: usize) -> Table {
         let mut vec_of_rows: Vec<Row> = Vec::new();
         for y in 0..height {
             vec_of_rows.push(Row::new(width, y))
@@ -85,19 +84,33 @@ impl Table {
         format!("<table>{}</table>", html_rows)
     }
 
-    pub fn add_row(&self, y: u32) -> Table {
+    pub fn add_row(&self, y: usize) -> Table {
+        let mut new_table = self.clone();
+        new_table.rows.insert(y, Row::new(self.width, y));
+        new_table.rows.iter_mut().skip(y + 1).for_each(|row| {
+            row.order += 1;
+            row.cells.iter_mut().for_each(|cell| cell.y += 1)
+        });
+        new_table.height += 1;
+        new_table
+    }
+
+    pub fn remove_row(&self, y: usize) -> Table {
+        let mut new_table = self.clone();
+        new_table.rows.remove(y);
+        new_table.rows.iter_mut().skip(y).for_each(|row| {
+            row.order -= 1;
+            row.cells.iter_mut().for_each(|cell| cell.y -= 1)
+        });
+        new_table.height -= 1;
+        new_table
+    }
+
+    pub fn add_column(&self, x: usize) -> Table {
         todo!()
     }
 
-    pub fn remove_row(&self, y: u32) -> Table {
-        todo!()
-    }
-
-    pub fn add_column(&self, x: u32) -> Table {
-        todo!()
-    }
-
-    pub fn remove_column(&self, x: u32) -> Table {
+    pub fn remove_column(&self, x: usize) -> Table {
         todo!()
     }
 }
@@ -166,10 +179,10 @@ impl From<&String> for Table {
             .iter()
             .map(|html_row| Row::from(&html_row.to_string()))
             .collect();
-        let (height, width): (u32, u32) = rows[0]
+        let (height, width): (usize, usize) = rows[0]
             .cells
             .iter()
-            .fold((0, 0), |acc: (u32, u32), cell: &Cell| {
+            .fold((0, 0), |acc: (usize, usize), cell: &Cell| {
                 (acc.0 + cell.colspan, acc.1 + cell.rowspan)
             });
 
