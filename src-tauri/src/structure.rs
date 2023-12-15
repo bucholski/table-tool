@@ -19,56 +19,87 @@ pub struct Row {
 #[derive(Debug, PartialEq)]
 pub struct Table {
     pub rows: Vec<Row>,
+    pub height: u32,
+    pub width: u32,
 }
 
-pub fn add_row(table: Table, y: u32) -> Table {
-    todo!()
-}
-
-pub fn remove_row(table: Table, y: u32) -> Table {
-    todo!()
-}
-
-pub fn add_column(table: Table, x: u32) -> Table {
-    todo!()
-}
-
-pub fn remove_column(table: Table, x: u32) -> Table {
-    todo!()
-}
-
-pub fn new_cell(x: u32, y: u32, rowspan: u32, colspan: u32, data: String) -> Cell {
-    Cell {
-        x,
-        y,
-        rowspan,
-        colspan,
-
-        data: data,
+impl Cell {
+    pub fn new(x: u32, y: u32, rowspan: u32, colspan: u32, data: String) -> Cell {
+        Cell {
+            x,
+            y,
+            rowspan,
+            colspan,
+            data,
+        }
+    }
+    fn to_html(&self) -> String {
+        format!(
+            "<td x={} y={} rowspan={} colspan={} ><input>{}</input></td>",
+            &self.x, &self.y, &self.rowspan, &self.colspan, &self.data
+        )
     }
 }
 
-pub fn new_row(width: u32, order: u32) -> Row {
-    let mut vec_of_cells: Vec<Cell> = Vec::new();
-    for x in 0..width {
-        vec_of_cells.push(new_cell(x, order, 1, 1, "".to_string()))
+impl Row {
+    pub fn new(width: u32, order: u32) -> Row {
+        let mut vec_of_cells: Vec<Cell> = Vec::new();
+        for x in 0..width {
+            vec_of_cells.push(Cell::new(x, order, 1, 1, "".to_string()))
+        }
+        Row {
+            order,
+            cells: vec_of_cells,
+        }
     }
-    Row {
-        order,
-        cells: vec_of_cells,
+
+    fn to_html(&self) -> String {
+        let html_cells: String = self
+            .cells
+            .iter()
+            .map(|rust_cell| rust_cell.to_html())
+            .collect();
+        format!("<tr>{}</tr>", html_cells)
     }
 }
 
-pub fn new_table(height: u32, width: u32) -> Table {
-    let mut vec_of_rows: Vec<Row> = Vec::new();
-    for y in 0..height {
-        vec_of_rows.push((new_row(width, y)))
+impl Table {
+    pub fn new(height: u32, width: u32) -> Table {
+        let mut vec_of_rows: Vec<Row> = Vec::new();
+        for y in 0..height {
+            vec_of_rows.push((Row::new(width, y)))
+        }
+        Table {
+            rows: vec_of_rows,
+            height,
+            width,
+        }
     }
-    Table { rows: vec_of_rows }
-}
 
-pub trait ToHtml {
-    fn to_html(&self) -> String;
+    pub fn to_html(&self) -> String {
+        let html_rows: String = self
+            .rows
+            .iter()
+            .map(|rust_row| rust_row.to_html())
+            .collect();
+        format!("<table>{}</table>", html_rows)
+    }
+
+    pub fn add_row(&self, y: u32) -> Table {
+        todo!()
+    }
+
+    pub fn remove_row(&self, y: u32) -> Table {
+        todo!()
+    }
+
+    pub fn add_column(&self, x: u32) -> Table {
+        todo!()
+    }
+
+    pub fn remove_column(&self, x: u32) -> Table {
+        todo!()
+    }
 }
 
 impl From<&String> for Cell {
@@ -84,7 +115,7 @@ impl From<&String> for Cell {
             .map(|x| x.to_string())
             .collect();
 
-        new_cell(
+        Cell::new(
             values[0].parse().expect(&format!(
                 "Parsing of 'x' value resulted in an error. The value was {}",
                 values[0]
@@ -135,39 +166,18 @@ impl From<&String> for Table {
             .iter()
             .map(|html_row| Row::from(&html_row.to_string()))
             .collect();
-
-        Table { rows }
-    }
-}
-
-impl ToHtml for Cell {
-    fn to_html(&self) -> String {
-        format!(
-            "<td x={} y={} rowspan={} colspan={} ><input>{}</input></td>",
-            &self.x, &self.y, &self.rowspan, &self.colspan, &self.data
-        )
-    }
-}
-
-impl ToHtml for Row {
-    fn to_html(&self) -> String {
-        let html_cells: String = self
+        let (height, width): (u32, u32) = rows[0]
             .cells
             .iter()
-            .map(|rust_cell| rust_cell.to_html())
-            .collect();
-        format!("<tr>{}</tr>", html_cells)
-    }
-}
+            .fold((0, 0), |acc: (u32, u32), cell: &Cell| {
+                (acc.0 + cell.colspan, acc.1 + cell.rowspan)
+            });
 
-impl ToHtml for Table {
-    fn to_html(&self) -> String {
-        let html_rows: String = self
-            .rows
-            .iter()
-            .map(|rust_row| rust_row.to_html())
-            .collect();
-        format!("<table>{}</table>", html_rows)
+        Table {
+            rows,
+            height,
+            width,
+        }
     }
 }
 
@@ -178,13 +188,13 @@ mod tests {
 
     #[test]
     fn cell_rust_to_html_test() {
-        let rust_cell = new_cell(1, 1, 1, 2, String::from("hioh!"));
+        let rust_cell = Cell::new(1, 1, 1, 2, String::from("hioh!"));
         let html_cell = "<td x=1 y=1 rowspan=1 colspan=2 ><input>hioh!</input></td>".to_string();
         assert_eq!(rust_cell.to_html(), html_cell);
     }
     #[test]
     fn cell_html_to_rust_test() {
-        let rust_cell = new_cell(1, 2, 2, 2, String::from("hio222h!"));
+        let rust_cell = Cell::new(1, 2, 2, 2, String::from("hio222h!"));
         let html_cell = "<td x=1 y=2 rowspan=2 colspan=2 ><input>hio222h!</input></td>".to_string();
 
         assert_eq!(Cell::from(&html_cell), rust_cell);
@@ -273,6 +283,8 @@ mod tests {
                     ]),
                 },
             ]),
+            height: 3,
+            width: 3,
         };
         assert_eq!(html_table, Table::from(&rust_table.to_html()).to_html());
         assert_eq!(Table::from(&Table::from(&html_table).to_html()), rust_table);
