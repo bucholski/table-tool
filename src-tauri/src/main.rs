@@ -2,8 +2,8 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
 // Learn more about Tauri commands at https://tauri.app/v1/guides/features/command
-pub mod structure;
-// use structure;
+pub mod table;
+// use table;
 
 #[tauri::command]
 fn generate_new_table(height: &str, width: &str) -> String {
@@ -16,7 +16,7 @@ fn generate_new_table(height: &str, width: &str) -> String {
         Ok(number) => number,
         Err(_) => todo!("only numbers plz"),
     };
-    let table = structure::Table::new(height, width);
+    let table = table::Table::new(height, width);
     table.to_html()
 }
 
