@@ -8,14 +8,14 @@ async function generateNewTable(width, height) {
     width: width.value,
   });
 }
-//Debug below
 //Initiate with a 3x3 table
 window.addEventListener("DOMContentLoaded", () => {
-  let width = {};
-  let height = {};
-  width.value = "3";
-  height.value = "3";
-  width.value && height.value ? generateNewTable(width, height) : null;
+  //Debug below
+  // let width = {};
+  // let height = {};
+  // width.value = "3";
+  // height.value = "3";
+  // width.value && height.value ? generateNewTable(width, height) : null;
   //Debug above
   document
     .querySelector("#table-generation-form")
