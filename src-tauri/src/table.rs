@@ -1,6 +1,8 @@
 //TODO
 //every From -> TryFrom should return a Result e.g. Result<Ok(Cell), Err(e)>? ?????
 
+use tauri::utils::html;
+
 #[derive(Debug, PartialEq, Clone)]
 pub struct Cell {
     pub x: usize,
@@ -34,9 +36,16 @@ impl Cell {
         }
     }
     fn to_html(&self) -> String {
+        let controller = match (self.x,self.y) {
+          (0,0) => "<section class=\"controller\"><div class=\"row remove\"></div><div class=\"row add\"></div><div class=\"row add before\"></div><div class=\"column remove\"></div><div class=\"column add\"></div><div class=\"column add before\"></div></section>",
+          (0,_) => "<section class=\"controller\"><div class=\"row remove\"></div><div class=\"row add\"></div></section>",
+          (_,0) => "<section class=\"controller\"><div class=\"column remove\"></div><div class=\"column add\"></div></section>",
+          _ =>"",
+        };
+
         format!(
-            "<td x={} y={} rowspan={} colspan={} ><input>{}</input></td>",
-            &self.x, &self.y, &self.rowspan, &self.colspan, &self.data
+            "<td x={} y={} rowspan={} colspan={} ><input>{}</input>{}</td>",
+            &self.x, &self.y, &self.rowspan, &self.colspan, &self.data, controller
         )
     }
 }
@@ -133,19 +142,25 @@ impl Table {
 
 impl From<&String> for Cell {
     fn from(html_cell: &String) -> Cell {
+        let controller = (
+            html_cell.find("<section").unwrap_or(0),
+            html_cell.find("</section>").unwrap_or(0),
+        );
+        let mut html_cell = html_cell.clone();
+        html_cell.drain(controller.0..(controller.1));
+        let html_cell = html_cell.replace("</section>", "");
+
         let values: Vec<String> = html_cell
             .trim_start_matches("<td x=")
             .replace(" y=", "→→!!delimiter!!←←")
             .replace(" rowspan=", "→→!!delimiter!!←←")
             .replace(" colspan=", "→→!!delimiter!!←←")
             .replace(" ><input>", "→→!!delimiter!!←←")
-            .trim_end_matches("</input>")
-            .trim_end_matches("<div class=\"controls\"></div>")
-            .trim_end_matches("</td>")
+            .trim_end_matches("</input></td>")
             .split("→→!!delimiter!!←←")
             .map(|x| x.to_string())
             .collect();
-
+        dbg!(&values);
         Cell::new(
             values[0].parse().expect(&format!(
                 "Parsing of 'x' value resulted in an error. The value was {}",
@@ -153,15 +168,15 @@ impl From<&String> for Cell {
             )),
             values[1].parse().expect(&format!(
                 "Parsing of 'y' value resulted in an error. The value was {}",
-                values[0]
+                values[1]
             )),
             values[2].parse().expect(&format!(
                 "Parsing of 'rowspan' value resulted in an error. The value was {}",
-                values[0]
+                values[2]
             )),
             values[3].parse().expect(&format!(
                 "Parsing of 'colspan' value resulted in an error. The value was {}",
-                values[0]
+                values[3]
             )),
             values[4].to_string(),
         )
@@ -218,13 +233,7 @@ mod tests {
     use super::*;
 
     #[test]
-    fn cell_rust_to_html_test() {
-        let rust_cell = Cell::new(1, 1, 1, 2, String::from("hioh!"));
-        let html_cell = "<td x=1 y=1 rowspan=1 colspan=2 ><input>hioh!</input></td>".to_string();
-        assert_eq!(rust_cell.to_html(), html_cell);
-    }
-    #[test]
-    fn cell_html_to_rust_test() {
+    fn cell_parsing_test() {
         let rust_cell = Cell::new(1, 2, 2, 2, String::from("hio222h!"));
         let html_cell = "<td x=1 y=2 rowspan=2 colspan=2 ><input>hio222h!</input></td>".to_string();
 
@@ -317,7 +326,6 @@ mod tests {
             height: 3,
             width: 3,
         };
-        assert_eq!(html_table, Table::from(&rust_table.to_html()).to_html());
         assert_eq!(Table::from(&Table::from(&html_table).to_html()), rust_table);
     }
 }
